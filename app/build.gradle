@@ -18,13 +18,16 @@ android {
 
     }
 
-    // 签名配置:使用已有的 ktv_keystore.jks
+    // 签名配置:若存在 ktv_keystore.jks 则使用，否则回退到 debug 签名以便能正常建置
     signingConfigs {
         release {
-            storeFile file("../../ktv_keystore.jks")
-            storePassword "123456"
-            keyAlias "ktv"
-            keyPassword "123456"
+            def keystoreFile = file("../../ktv_keystore.jks")
+            if (keystoreFile.exists()) {
+                storeFile keystoreFile
+                storePassword "123456"
+                keyAlias "ktv"
+                keyPassword "123456"
+            }
         }
     }
 
@@ -32,7 +35,12 @@ android {
         release {
             minifyEnabled true
             shrinkResources true
-            signingConfig signingConfigs.release
+            def keystoreFile = file("../../ktv_keystore.jks")
+            if (keystoreFile.exists()) {
+                signingConfig signingConfigs.release
+            } else {
+                signingConfig signingConfigs.debug
+            }
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
         debug {
